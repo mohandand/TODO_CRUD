@@ -4,7 +4,7 @@ export default function App() {
   const [todos, setTodos] = useState([]);
   const [todo, setTodo] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [currentTodo, setCurrentTodo] = useState({});
+  const [currentTodo, setCurrentTodo] = useState({ id: '', text: '' });
 
   function handleInputChange(e) {
     setTodo(e.target.value);
@@ -52,7 +52,11 @@ export default function App() {
 
   function handleEditClick(todo) {
     setIsEditing(true);
-    setCurrentTodo({ ...todo });
+    let temp = {
+      id: todo.id,
+      text: todo.text,
+    };
+    setCurrentTodo({ ...temp });
   }
 
   return (
