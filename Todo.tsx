@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-export default function TODO() {
-  const [todo, SetTodo] = useState('');
-  const [todos, SetTodos] = useState([]);
+export default function App() {
+  const [todos, setTodos] = useState([]);
+  const [todo, setTodo] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentTodo, setCurrentTodo] = useState({});
 
-  function handleInput(e) {
-    e.preventDefault();
-    SetTodo(e.target.value);
-    console.log(todo);
+  function handleInputChange(e) {
+    setTodo(e.target.value);
   }
 
-  function handleTodo(e) {
+  function handleEditInputChange(e) {
+    setCurrentTodo({ ...currentTodo, text: e.target.value });
+    console.log(currentTodo);
+  }
+
+  function handleFormSubmit(e) {
     e.preventDefault();
     if (todo !== '') {
-      SetTodos([
+      setTodos([
         ...todos,
         {
           id: todos.length + 1,
@@ -21,27 +26,75 @@ export default function TODO() {
         },
       ]);
     }
-    console.log(todos);
-    // clear out the input box
-    SetTodo('');
+
+    setTodo('');
+  }
+
+  function handleEditFormSubmit(e) {
+    e.preventDefault();
+
+    handleUpdateTodo(currentTodo.id, currentTodo);
+  }
+
+  function handleDeleteClick(id) {
+    const removeItem = todos.filter((todo) => {
+      return todo.id !== id;
+    });
+    setTodos(removeItem);
+  }
+  function handleUpdateTodo(id, updatedTodo) {
+    const updatedItem = todos.map((todo) => {
+      return todo.id === id ? updatedTodo : todo;
+    });
+    setIsEditing(false);
+    setTodos(updatedItem);
+  }
+
+  function handleEditClick(todo) {
+    setIsEditing(true);
+    setCurrentTodo({ ...todo });
   }
 
   return (
-    <div className="todocontainer">
-      <form>
-        <input onChange={handleInput}></input>
-        <button onClick={handleTodo}> ADD</button>
-      </form>
-      <div>
-        {todos.map((item, index) => {
-          return (
-            <div>
-              <span key={index}>{item.text}</span>
-              <button>Del</button>
-            </div>
-          );
-        })}
-      </div>
+    <div className="App">
+      {isEditing ? (
+        <form onSubmit={handleEditFormSubmit}>
+          <h2>Edit Todo</h2>
+          <label htmlFor="editTodo">Edit todo: </label>
+          <input
+            name="editTodo"
+            type="text"
+            placeholder="Edit todo"
+            value={currentTodo.text}
+            onChange={handleEditInputChange}
+          />
+          <button type="submit">Update</button>
+          <button onClick={() => setIsEditing(false)}>Cancel</button>
+        </form>
+      ) : (
+        <form onSubmit={handleFormSubmit}>
+          <h2>Add Todo</h2>
+          <label htmlFor="todo">Add todo: </label>
+          <input
+            name="todo"
+            type="text"
+            placeholder="Create a new todo"
+            value={todo}
+            onChange={handleInputChange}
+          />
+          <button type="submit">Add</button>
+        </form>
+      )}
+
+      <ul className="todo-list">
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            {todo.text}
+            <button onClick={() => handleEditClick(todo)}>Edit</button>
+            <button onClick={() => handleDeleteClick(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
